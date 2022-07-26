@@ -25,3 +25,21 @@ function addSumFormula(){ // insert sum formula to timeline rows
   var pasteRange = ss.getRange(5,16, lastRow - 5); // CHANGE numbers to the range you want to formula to be in 
   ss.getRange("P5").copyTo(pasteRange); //CHANGE P5 to where you want the sum to be
 }
+
+
+
+function getColumnLetters(columnIndexStartFromOne) { // convert column numbers into letters
+  const ALPHABETS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+  if (columnIndexStartFromOne < 27) {
+    return ALPHABETS[columnIndexStartFromOne - 1]
+  } else {
+    var res = columnIndexStartFromOne % 26
+    var div = Math.floor(columnIndexStartFromOne / 26)
+    if (res === 0) {
+      div = div - 1
+      res = 26
+    }
+    return getColumnLetters(div) + ALPHABETS[res - 1]
+  }
+}
