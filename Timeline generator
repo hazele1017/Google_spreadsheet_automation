@@ -1,8 +1,19 @@
-function nm (){ // creates weekly timeline on Financials sheet
+/* This script creates a weekly timeline into newly created columns as headers given start date, end date, and calculated number of weeks between dates 
+*
+* Google Sheet Pre-requisites:
+* start date, end date, and calculated number of weeks between dates in separate cells
+* google drawing button
+*
+*/
+
+
+
+function timelineGenerator (){ // creates weekly timeline on Financials sheet
   //Setting cells to grab week numbers, endDate, and sheet name
-  var numWeeksCell = "V2";
-  var endDateCell = "U3";
-  var spreadSheetName = "Financials";
+  
+  var numWeeksCell = "V2";   //CHANGE to cell that holds number of weeks
+  var endDateCell = "U3";   //CHANGE to cell that holds end date
+  var spreadSheetName = "Sheet1";  //CHANGE to sheet name
 
   var sh1 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(spreadSheetName)
   var numWeeks = sh1.getRange(numWeeksCell).getValue();
@@ -13,25 +24,42 @@ function nm (){ // creates weekly timeline on Financials sheet
   var newDate = new Date();
 
   // creates first column 
+  
+  //CHANGE number in insertColumnBefore function to determine where to start adding in new columns
   sh1.insertColumnBefore(25);
+  
+  //CHANGE numbers in gerRange to place new dates
   sh1.getRange(1,26).setValue(endDate);
+  
+  //CHANGE number in setTextRotation function to set text orientation 
   sh1.getRange(1,26).setTextRotation(90);
+  
+  //CHANGE number in setColumnWidth function to set column width
   sh1.setColumnWidth(26,33);
-  sh1.getRange(2,26,1,1 ).setValue(numWeeks).setFontColor("black");
+  sh1.getRange(2,26,1,1 ).setValue(numWeeks).setFontColor("black"); // CHANGE "black" to any color font (name of color or hex code as strings) 
 
+  //calculates starting day of week before endDate
   //creates subsequent weeks and columns
   for (i = 0; i < numWeeks; i++){
     newDate = subWeeks(endDate); // subtracting endDate by 7 days
     endDate = newDate; // set new date into new columns
+    
+    //CHANGE number in insertColumnBefore function to determine where to start adding in new columns
     sh1.insertColumnBefore(25);
+    
+    //CHANGE numbers in gerRange to place new dates
     sh1.getRange(1,26 ).setValue(newDate);
+    
+    //CHANGE number in setTextRotation function to set text orientation 
     sh1.getRange(1,26 ).setTextRotation(90);
+    
+    //CHANGE number in setColumnWidth function to set column width
     sh1.setColumnWidth(26,33);
-    sh1.getRange(2,26,1,1).setValue(numWeeks - (i+1)).setFontColor("black");
+    sh1.getRange(2,26,1,1).setValue(numWeeks - (i+1)).setFontColor("black"); // CHANGE "black" to any color font (name of color or hex code as strings) 
   
   }
   
-  addSumFormula(); // insert sum formula to timeline rows
+  //addSumFormula(); // insert sum formula to timeline rows
   
 }
 
@@ -40,28 +68,6 @@ function subWeeks (endDate){ // substract endDate by 7 days
   return newWeek;
 }
 
-function addSumFormula(){ // insert sum formula to timeline rows
-  //grab sheet name
-  var spreadSheetName = "Financials";
-  var ss = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(spreadSheetName);
-
-  //find last column to set range
-  var lastColumn = ss.getLastColumn();
-  var columnLetter = getColumnLetters(lastColumn); // convert column number to letter
-
-  //set text that will be inserted into rows
-  var startFormula = "=IFERROR(SUM(Z5:";
-  var endFormula = "5))";
-  var wholeFormula = startFormula + columnLetter + endFormula;
-  ss.getRange("P5").setFormula(wholeFormula);
-
-  //find last row to set range
-  var lastRow = ss.getLastRow();
-
-  //find copy paste range to insert formula
-  var pasteRange = ss.getRange(5,16, lastRow - 5);
-  ss.getRange("P5").copyTo(pasteRange);
-}
 
 function getColumnLetters(columnIndexStartFromOne) { // convert column numbers into letters
   const ALPHABETS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
@@ -77,114 +83,5 @@ function getColumnLetters(columnIndexStartFromOne) { // convert column numbers i
     }
     return getColumnLetters(div) + ALPHABETS[res - 1]
   }
-}
-
-function timelinePhases (){ // create timeline and phase blocks for timeline tab
-  //Setting cells to grab week numbers, endDate, startDate
-  var numWeeksCell = "E2";
-  var endDateCell = "C3";
-  var startDateCell = "C2";
-
-  //grab Timeline tab
-  var sh1 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Timeline")
-
-  var numWeeks = sh1.getRange(numWeeksCell).getValue();
-  var endDate = sh1.getRange(endDateCell).getValue();
-  var endDate = new Date(sh1.getRange(endDateCell).getValue());
-  var newDate = new Date();
-
-
-  if (numWeeks < 52){ // weekly timeline if project is less than a year
-    // creates first column 
-    sh1.insertColumnBefore(6);
-    sh1.getRange(5,6 ).setValue(endDate);
-    sh1.getRange(5,6 ).setTextRotation(90);
-    sh1.setColumnWidth(6,60);
-    sh1.getRange(5,6 ).setBackground("#a61c00");
-    sh1.getRange(5,6 ).setFontColor("white");
-    sh1.getRange(5,6 ).setFontWeight("bold");
-
-    //creates subsequent weeks and columns
-    for (i = 0; i < numWeeks; i++){
-      console.log("in loop");
-      newDate = subWeeks(endDate);
-      endDate = newDate;
-      sh1.insertColumnBefore(6);
-      sh1.getRange(5,6 ).setValue(newDate);
-      sh1.setColumnWidth(6,60);
-      sh1.getRange(5,6 ).setBackground("#a61c00");
-      sh1.getRange(5,6 ).setFontColor("white");
-      sh1.getRange(5,6 ).setFontWeight("bold");
-    }
-
-     phasesColorr(); //colors phases by week
-
-  } else { // monthly timeline if project is a year or more
-    var numMonths = numWeeks / 4; // calculates the number of months in a project based on weeks
-    var startMonth = endDate.getMonth() + 1
-    var year = sh1.getRange(startDateCell).getValue().getFullYear() + 1;
-
-    //create first column
-    sh1.insertColumnBefore(6);
-    sh1.getRange(5,6 ).setValue(numberToMonth(startMonth) + " " + year); // converts number month to string months then set month to column header
-    sh1.getRange(5,6 ).setTextRotation(90);
-    sh1.setColumnWidth(6,60);
-    sh1.getRange(5,6 ).setBackground("#a61c00");
-    sh1.getRange(5,6 ).setFontColor("white");
-    sh1.getRange(5,6 ).setFontWeight("bold");
-    startMonth --; // creates last month column first
-
-    //creates subsequent month columns
-    for (i = 0; i < numMonths - 2; i++){
-      sh1.insertColumnBefore(6);
-      sh1.getRange(5,6 ).setValue(numberToMonth(startMonth) + " " + year);
-      sh1.setColumnWidth(6,60);
-      sh1.getRange(5,6 ).setBackground("#a61c00");
-      sh1.getRange(5,6 ).setFontColor("white");
-      sh1.getRange(5,6 ).setFontWeight("bold");
-      startMonth --;
-
-      //reset month once year is over
-      //increments year once months reset
-      if (startMonth == 0){
-        startMonth = 12;
-        year --;
-      }
-
-    
-    }
-    colorByMmonth(); // color phases by months
-  }
-}
-
-function numberToMonth (monthNum){ // converts month numbers to month names
-  var monthString;
-  if (monthNum == 1){
-    monthString = "January"    
-  } else if (monthNum == 2){
-    monthString = "February"    
-  } else if (monthNum == 3){
-    monthString = "March"    
-  } else if (monthNum == 4){
-    monthString = "April"    
-  } else if (monthNum == 5){
-    monthString = "May"    
-  } else if (monthNum == 6){
-    monthString = "June"    
-  } else if (monthNum == 7){
-    monthString = "July"    
-  } else if (monthNum == 8){
-    monthString = "August"    
-  } else if (monthNum == 9){
-    monthString = "September"    
-  } else if (monthNum == 10){
-    monthString = "October"    
-  } else if (monthNum == 11){
-    monthString = "November"    
-  } else if (monthNum == 12){
-    monthString = "December"    
-  }
-
-  return monthString;
 }
 
