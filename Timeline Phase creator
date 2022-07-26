@@ -1,0 +1,142 @@
+/* This script creates a weekly timeline into newly created columns as headers given start date, end date, and calculated number of weeks between dates 
+*
+* Google Sheet Pre-requisites:
+* start date, end date, and calculated number of weeks between dates in separate cells
+* google drawing button
+*
+*/
+
+function timelinePhases (){ // create timeline and phase blocks for timeline tab
+  //Setting cells to grab week numbers, endDate, startDate
+  var numWeeksCell = "E2"; //CHANGE to cell that holds number of weeks
+  var endDateCell = "C3";  //CHANGE to cell that holds end date
+  var startDateCell = "C2"; //CHANGE to cell that holds start date
+
+  //grab Timeline tab
+  var sh1 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1") //CHANGE to sheet name
+
+
+  var numWeeks = sh1.getRange(numWeeksCell).getValue();
+  var endDate = sh1.getRange(endDateCell).getValue();
+  var endDate = new Date(sh1.getRange(endDateCell).getValue());
+  var newDate = new Date();
+
+
+  if (numWeeks < 12){ // weekly timeline if project is less than 12 weeks
+    // creates first column 
+    //CHANGE number in functions to customize font, color, and location of dates
+    sh1.insertColumnBefore(6);
+    sh1.getRange(5,6 ).setValue(endDate);
+    sh1.getRange(5,6 ).setTextRotation(90);
+    sh1.setColumnWidth(6,60);
+    sh1.getRange(5,6 ).setBackground("#a61c00");
+    sh1.getRange(5,6 ).setFontColor("white");
+    sh1.getRange(5,6 ).setFontWeight("bold");
+
+    //creates subsequent weeks and columns
+    for (i = 0; i < numWeeks; i++){
+      console.log("in loop");
+      newDate = subWeeks(endDate);
+      endDate = newDate;
+      
+      //CHANGE number in functions to customize font, color, and location of date
+      sh1.insertColumnBefore(6);
+      sh1.getRange(5,6 ).setValue(newDate);
+      sh1.setColumnWidth(6,60);
+      sh1.getRange(5,6 ).setBackground("#a61c00");
+      sh1.getRange(5,6 ).setFontColor("white");
+      sh1.getRange(5,6 ).setFontWeight("bold");
+    }
+
+     phasesColorr(); //colors phases by week
+
+  }else if (numWeeks >= 12 && numWeeks < 52){
+    var startMonth = sh1.getRange(2,3).getValue().getMonth() + 1;
+    var endMonth = sh1.getRange(3,3).getValue().getMonth() + 1;
+
+    if (endMonth < startMonth){
+      endMonth =+ 13;
+    }
+
+    var numMonths = (endMonth - startMonth) + 1;
+
+    for (i = 0; i < numMonths; i++){
+      var year = sh1.getRange(startDateCell).getValue().getFullYear()
+      sh1.insertColumnBefore(6);
+      sh1.getRange(5,6 ).setValue(numberToMonth(endMonth) + " " + year); // converts number month to string months then set month to column header
+      sh1.getRange(5,6 ).setTextRotation(90);
+      sh1.setColumnWidth(6,60);
+      sh1.getRange(5,6 ).setBackground("#a61c00");
+      sh1.getRange(5,6 ).setFontColor("white");
+      sh1.getRange(5,6 ).setFontWeight("bold");
+      endMonth--;
+    }
+    colorByMmonth();
+  }else { // monthly timeline if project is a year or more
+    var numMonths = numWeeks / 4; // calculates the number of months in a project based on weeks
+    var startMonth = endDate.getMonth() + 1;
+    var year = sh1.getRange(startDateCell).getValue().getFullYear() + 1;
+
+    //create first column
+    sh1.insertColumnBefore(6);
+    sh1.getRange(5,6 ).setValue(numberToMonth(startMonth) + " " + year); // converts number month to string months then set month to column header
+    sh1.getRange(5,6 ).setTextRotation(90);
+    sh1.setColumnWidth(6,60);
+    sh1.getRange(5,6 ).setBackground("#a61c00");
+    sh1.getRange(5,6 ).setFontColor("white");
+    sh1.getRange(5,6 ).setFontWeight("bold");
+    startMonth --; // creates last month column first
+
+    //creates subsequent month columns
+    for (i = 0; i < numMonths - 2; i++){
+      sh1.insertColumnBefore(6);
+      sh1.getRange(5,6 ).setValue(numberToMonth(startMonth) + " " + year);
+      sh1.setColumnWidth(6,60);
+      sh1.getRange(5,6 ).setBackground("#a61c00");
+      sh1.getRange(5,6 ).setFontColor("white");
+      sh1.getRange(5,6 ).setFontWeight("bold");
+      startMonth --;
+
+      //reset month once year is over
+      //increments year once months reset
+      if (startMonth == 0){
+        startMonth = 12;
+        year --;
+      }
+
+    
+    }
+    colorByMmonth(); // color phases by months
+  }
+}
+
+function numberToMonth (monthNum){ // converts month numbers to month names
+  var monthString;
+  if (monthNum == 1){
+    monthString = "January"    
+  } else if (monthNum == 2){
+    monthString = "February"    
+  } else if (monthNum == 3){
+    monthString = "March"    
+  } else if (monthNum == 4){
+    monthString = "April"    
+  } else if (monthNum == 5){
+    monthString = "May"    
+  } else if (monthNum == 6){
+    monthString = "June"    
+  } else if (monthNum == 7){
+    monthString = "July"    
+  } else if (monthNum == 8){
+    monthString = "August"    
+  } else if (monthNum == 9){
+    monthString = "September"    
+  } else if (monthNum == 10){
+    monthString = "October"    
+  } else if (monthNum == 11){
+    monthString = "November"    
+  } else if (monthNum == 12){
+    monthString = "December"    
+  }
+
+  return monthString;
+}
