@@ -1,0 +1,27 @@
+/* Add sum formula to newly created columns
+* Used in conjunction with time line generator funciton but can be used separately 
+*
+*/
+
+function addSumFormula(){ // insert sum formula to timeline rows
+  //grab sheet name
+  var spreadSheetName = "Sheet1"; //CHANGE to sheet name
+  var ss = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(spreadSheetName);
+
+  //find last column to set range
+  var lastColumn = ss.getLastColumn();
+  var columnLetter = getColumnLetters(lastColumn); // convert column number to letter to get last column available
+
+  //set text that will be inserted into rows
+  var startFormula = "=IFERROR(SUM(Z5:"; // CHANGE to get start range of addends
+  var endFormula = "5))"; 
+  var wholeFormula = startFormula + columnLetter + endFormula; 
+  ss.getRange("P5").setFormula(wholeFormula);  //CHANGE P5 to where you want the sum to be
+
+  //find last row to set range
+  var lastRow = ss.getLastRow();
+
+  //find copy paste range to insert formula
+  var pasteRange = ss.getRange(5,16, lastRow - 5); // CHANGE numbers to the range you want to formula to be in 
+  ss.getRange("P5").copyTo(pasteRange); //CHANGE P5 to where you want the sum to be
+}
