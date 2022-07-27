@@ -140,3 +140,123 @@ function numberToMonth (monthNum){ // converts month numbers to month names
 
   return monthString;
 }
+
+
+function phasesColorr() { //detemines phase blocks and colors
+//set cells to grab info from 
+var prepCell = "C6"
+var confirmationCell = "C7";
+var designCell = "C8";
+var buildCell = "C9";
+var deployCell = "C10";
+var hypercareCell = "C11";
+var sheetName = "Timeline";
+
+//takes weeks for each phase
+var sh2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName)
+var prep = sh2.getRange(prepCell).getValue();
+var confirmation = sh2.getRange(confirmationCell).getValue();
+var design = sh2.getRange(designCell).getValue();
+var build = sh2.getRange(buildCell).getValue();
+var deploy = sh2.getRange(deployCell).getValue();
+var hypercare = sh2.getRange(hypercareCell).getValue();
+
+//gets number of blocks to be colored in then adds to previous phase
+if (prep != 0){
+  sh2.getRange(6,6,1,prep).setBackground("#dedede");
+  sh2.setRowHeight(5,60);
+}
+
+var endCol = prep + 6;
+if (confirmation != 0) {
+  sh2.getRange(7,endCol,1,confirmation).setBackground("#d9d9d9");
+}
+
+endCol += confirmation;
+if (design != 0) {
+  sh2.getRange(8,endCol,1,design).setBackground("#b7b7b7");
+}
+
+endCol += design;
+if (build != 0){
+  sh2.getRange(9,endCol,1,build).setBackground("#666666");
+} 
+
+endCol += build;
+if (deploy != 0) {
+  sh2.getRange(10,endCol,1,deploy).setBackground("#434343");
+} 
+
+endCol += deploy;
+if (hypercare != 0) {
+  sh2.getRange(11,endCol,1,hypercare+1).setBackground("#000000");
+}
+
+}
+
+
+//colors in phases by month
+function colorByMmonth(){
+  colorSet("D6","E6",6,"#dedede");
+  colorSet("D7","E7",7,"#d9d9d9");
+  colorSet("D8","E8",8,"#b7b7b7");
+  colorSet("D9","E9",9,"#666666");
+  colorSet("D10","E10",10,"#434343");
+  colorSet("D11","E11",11,"#000000");
+
+}
+
+
+function colorSet(ssCell,eeCell,row, color) {
+  //find number of blocks to be colored for each phase
+  var sheetName = "Timeline";
+  var sh2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName)
+ 
+  //month tracker
+  var checkCellCol = 6;
+  var checkMonth = sh2.getRange(5, checkCellCol).getValue().getMonth() + 1;
+  var checkYear = sh2.getRange(5, checkCellCol).getValue().getFullYear();
+  var checking = numberToMonth(checkMonth) + " " + checkYear;
+
+  //find start date 
+  var start = sh2.getRange(ssCell).getValue().getMonth() + 1;
+  var startString = numberToMonth (start);
+  var startYear = sh2.getRange(ssCell).getValue().getFullYear();
+  var startDate = startString + " " + startYear;
+
+  //find end date
+  var end = sh2.getRange(eeCell).getValue().getMonth() + 1;
+  var endString = numberToMonth (end);
+  var endYear = sh2.getRange(eeCell).getValue().getFullYear();
+  var endDate = endString + " " + endYear;
+
+  var numCol = 1; 
+
+  //finds where to start coloring blocks
+  while(startDate != checking){
+    checkCellCol ++;
+
+    checkMonth = sh2.getRange(5, checkCellCol).getValue();
+    checkMonth = checkMonth.getMonth() + 1;
+    checkYear = sh2.getRange(5, checkCellCol).getValue().getFullYear();
+    checking = numberToMonth(checkMonth) + " " + checkYear;
+
+  }
+
+  var col = checkCellCol;
+
+  //finds how many blocks to color
+  while(checking != endDate){
+    checkCellCol ++;
+    checkMonth = sh2.getRange(5, checkCellCol).getValue();
+    checkMonth = checkMonth.getMonth() + 1;
+    checkYear = sh2.getRange(5, checkCellCol).getValue().getFullYear();
+    checking = numberToMonth(checkMonth) + " " + checkYear;
+    numCol++;
+  }
+
+  sh2.getRange(row, col,1,numCol).setBackground(color);
+
+}
+
+
