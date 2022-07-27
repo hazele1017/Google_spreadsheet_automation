@@ -6,257 +6,290 @@
 *
 */
 
+var numWeeksCell = "D1"; //CHANGE to cell that holds number of weeks
+var endDateCell = "B2";  //CHANGE to cell that holds end date
+var startDateCell = "B1"; //CHANGE to cell that holds start date
+var sheetName = "Phase Maker" //CHANGE to sheet name
+var colStart = 6; //CHANGE column letter of where the timeline starts to number (A = 1, ..., F = 6)
+var rowStart = 4; //CHANGE  row where the timeline starts
+
+//CHANGE to cells that hold the number of weeks per phase
+var prepCell = "B5"
+var confirmationCell = "B6";
+var designCell = "B7";
+var buildCell = "B8";
+var deployCell = "B9";
+var hypercareCell = "B10";
+
+//CHANGE to color you want each phase to be in
+var phase1Color = "#dedede";
+var phase2Color = "#d9d9d9"
+var phase3Color = "#b7b7b7"
+var phase4Color = "#666666"
+var phase5Color = "#434343"
+var phase6Color = "#000000"
+
+
 function timelinePhases (){ // create timeline and phase blocks for timeline tab
-  //Setting cells to grab week numbers, endDate, startDate
-  var numWeeksCell = "E2"; //CHANGE to cell that holds number of weeks
-  var endDateCell = "C3";  //CHANGE to cell that holds end date
-  var startDateCell = "C2"; //CHANGE to cell that holds start date
-
-  //grab Timeline tab
-  var sh1 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1") //CHANGE to sheet name
+    //grab Timeline tab
+    var sh1 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName) //CHANGE to sheet name
 
 
-  var numWeeks = sh1.getRange(numWeeksCell).getValue();
-  var endDate = sh1.getRange(endDateCell).getValue();
-  var endDate = new Date(sh1.getRange(endDateCell).getValue());
-  var newDate = new Date();
+    var numWeeks = sh1.getRange(numWeeksCell).getValue();
+    var endDate = sh1.getRange(endDateCell).getValue();
+    var endDate = new Date(sh1.getRange(endDateCell).getValue());
+    var newDate = new Date();
 
 
-  if (numWeeks < 12){ // weekly timeline if project is less than 12 weeks
-    // creates first column 
-    //CHANGE number in functions to customize font, color, and location of dates
-    sh1.insertColumnBefore(6);
-    sh1.getRange(5,6 ).setValue(endDate);
-    sh1.getRange(5,6 ).setTextRotation(90);
-    sh1.setColumnWidth(6,60);
-    sh1.getRange(5,6 ).setBackground("#a61c00");
-    sh1.getRange(5,6 ).setFontColor("white");
-    sh1.getRange(5,6 ).setFontWeight("bold");
+    if (numWeeks < 12){ // weekly timeline if project is less than 12 weeks
+        // creates first column
+        //CHANGE number in functions to customize font, color, and location of dates
+        sh1.insertColumnBefore(colStart);
+        sh1.getRange(rowStart, colStart).setValue(endDate);
+        sh1.getRange(rowStart, colStart).setTextRotation(90);
+        sh1.setColumnWidth(colStart,60);
+        sh1.getRange(rowStart, colStart).setBackground("#a61c00");
+        sh1.getRange(rowStart, colStart).setFontColor("white");
+        sh1.getRange(rowStart, colStart).setFontWeight("bold");
 
-    //creates subsequent weeks and columns
-    for (i = 0; i < numWeeks; i++){
-      console.log("in loop");
-      newDate = subWeeks(endDate);
-      endDate = newDate;
-      
-      //CHANGE number in functions to customize font, color, and location of date
-      sh1.insertColumnBefore(6);
-      sh1.getRange(5,6 ).setValue(newDate);
-      sh1.setColumnWidth(6,60);
-      sh1.getRange(5,6 ).setBackground("#a61c00");
-      sh1.getRange(5,6 ).setFontColor("white");
-      sh1.getRange(5,6 ).setFontWeight("bold");
+        //creates subsequent weeks and columns
+        for (i = 0; i < numWeeks; i++){
+            newDate = subWeeks(endDate);
+            endDate = newDate;
+
+            //CHANGE number in functions to customize font, color, and location of date
+            sh1.insertColumnBefore(colStart);
+            sh1.getRange(rowStart, colStart).setValue(newDate);
+            sh1.setColumnWidth(colStart,60);
+            sh1.getRange(rowStart, colStart).setBackground("#a61c00");
+            sh1.getRange(rowStart, colStart).setFontColor("white");
+            sh1.getRange(rowStart, colStart).setFontWeight("bold");
+        }
+
+        phasesColorr(); //colors phases by week
+
+    }else if (numWeeks >= 12 && numWeeks < 52){
+        var startMonth = sh1.getRange(startDateCell).getValue().getMonth() + 1;
+        var endMonth = sh1.getRange(endDateCell).getValue().getMonth() + 1;
+
+        if (endMonth < startMonth){
+            endMonth =+ 13;
+        }
+
+        var numMonths = (endMonth - startMonth) + 1;
+
+        for (i = 0; i < numMonths; i++){
+            var year = sh1.getRange(startDateCell).getValue().getFullYear()
+            sh1.insertColumnBefore(colStart);
+            sh1.getRange(rowStart, colStart).setValue(numberToMonth(endMonth) + " " + year); // converts number month to string months then set month to column header
+            sh1.getRange(rowStart, colStart).setTextRotation(90);
+            sh1.setColumnWidth(colStart,60);
+            sh1.getRange(rowStart, colStart).setBackground("#a61c00");
+            sh1.getRange(rowStart, colStart).setFontColor("white");
+            sh1.getRange(rowStart, colStart).setFontWeight("bold");
+            endMonth--;
+        }
+        colorByMmonth();
+    }else if (numWeeks >= 52) { // monthly timeline if project is a year or more
+        var numMonths = numWeeks / 4; // calculates the number of months in a project based on weeks
+        var startMonth = endDate.getMonth() + 1;
+        var year = sh1.getRange(startDateCell).getValue().getFullYear() + 1;
+
+        //create first column
+        sh1.insertColumnBefore(timelineCol);
+        sh1.getRange(rowStart, colStart).setValue(numberToMonth(startMonth) + " " + year); // converts number month to string months then set month to column header
+        sh1.getRange(rowStart, colStart).setTextRotation(90);
+        sh1.setColumnWidth(timelineCol,60);
+        sh1.getRange(rowStart, colStart).setBackground("#a61c00");
+        sh1.getRange(rowStart, colStart).setFontColor("white");
+        sh1.getRange(rowStart, colStart).setFontWeight("bold");
+        startMonth --; // creates last month column first
+
+        //creates subsequent month columns
+        for (i = 0; i < numMonths - 2; i++){
+            sh1.insertColumnBefore(timelineCol);
+            sh1.getRange(rowStart, colStart).setValue(numberToMonth(startMonth) + " " + year);
+            sh1.setColumnWidth(timelineCol,60);
+            sh1.getRange(rowStart, colStart).setBackground("#a61c00");
+            sh1.getRange(rowStart, colStart).setFontColor("white");
+            sh1.getRange(rowStart, colStart).setFontWeight("bold");
+            startMonth --;
+
+            //reset month once year is over
+            //increments year once months reset
+            if (startMonth == 0){
+                startMonth = 12;
+                year --;
+            }
+
+
+        }
+        colorByMmonth(); // color phases by months
     }
-
-     phasesColorr(); //colors phases by week
-
-  }else if (numWeeks >= 12 && numWeeks < 52){
-    var startMonth = sh1.getRange(2,3).getValue().getMonth() + 1;
-    var endMonth = sh1.getRange(3,3).getValue().getMonth() + 1;
-
-    if (endMonth < startMonth){
-      endMonth =+ 13;
-    }
-
-    var numMonths = (endMonth - startMonth) + 1;
-
-    for (i = 0; i < numMonths; i++){
-      var year = sh1.getRange(startDateCell).getValue().getFullYear()
-      sh1.insertColumnBefore(6);
-      sh1.getRange(5,6 ).setValue(numberToMonth(endMonth) + " " + year); // converts number month to string months then set month to column header
-      sh1.getRange(5,6 ).setTextRotation(90);
-      sh1.setColumnWidth(6,60);
-      sh1.getRange(5,6 ).setBackground("#a61c00");
-      sh1.getRange(5,6 ).setFontColor("white");
-      sh1.getRange(5,6 ).setFontWeight("bold");
-      endMonth--;
-    }
-    colorByMmonth();
-  }else { // monthly timeline if project is a year or more
-    var numMonths = numWeeks / 4; // calculates the number of months in a project based on weeks
-    var startMonth = endDate.getMonth() + 1;
-    var year = sh1.getRange(startDateCell).getValue().getFullYear() + 1;
-
-    //create first column
-    sh1.insertColumnBefore(6);
-    sh1.getRange(5,6 ).setValue(numberToMonth(startMonth) + " " + year); // converts number month to string months then set month to column header
-    sh1.getRange(5,6 ).setTextRotation(90);
-    sh1.setColumnWidth(6,60);
-    sh1.getRange(5,6 ).setBackground("#a61c00");
-    sh1.getRange(5,6 ).setFontColor("white");
-    sh1.getRange(5,6 ).setFontWeight("bold");
-    startMonth --; // creates last month column first
-
-    //creates subsequent month columns
-    for (i = 0; i < numMonths - 2; i++){
-      sh1.insertColumnBefore(6);
-      sh1.getRange(5,6 ).setValue(numberToMonth(startMonth) + " " + year);
-      sh1.setColumnWidth(6,60);
-      sh1.getRange(5,6 ).setBackground("#a61c00");
-      sh1.getRange(5,6 ).setFontColor("white");
-      sh1.getRange(5,6 ).setFontWeight("bold");
-      startMonth --;
-
-      //reset month once year is over
-      //increments year once months reset
-      if (startMonth == 0){
-        startMonth = 12;
-        year --;
-      }
-
-    
-    }
-    colorByMmonth(); // color phases by months
-  }
 }
 
 function numberToMonth (monthNum){ // converts month numbers to month names
-  var monthString;
-  if (monthNum == 1){
-    monthString = "January"    
-  } else if (monthNum == 2){
-    monthString = "February"    
-  } else if (monthNum == 3){
-    monthString = "March"    
-  } else if (monthNum == 4){
-    monthString = "April"    
-  } else if (monthNum == 5){
-    monthString = "May"    
-  } else if (monthNum == 6){
-    monthString = "June"    
-  } else if (monthNum == 7){
-    monthString = "July"    
-  } else if (monthNum == 8){
-    monthString = "August"    
-  } else if (monthNum == 9){
-    monthString = "September"    
-  } else if (monthNum == 10){
-    monthString = "October"    
-  } else if (monthNum == 11){
-    monthString = "November"    
-  } else if (monthNum == 12){
-    monthString = "December"    
-  }
+    var monthString;
+    if (monthNum == 1){
+        monthString = "January"
+    } else if (monthNum == 2){
+        monthString = "February"
+    } else if (monthNum == 3){
+        monthString = "March"
+    } else if (monthNum == 4){
+        monthString = "April"
+    } else if (monthNum == 5){
+        monthString = "May"
+    } else if (monthNum == 6){
+        monthString = "June"
+    } else if (monthNum == 7){
+        monthString = "July"
+    } else if (monthNum == 8){
+        monthString = "August"
+    } else if (monthNum == 9){
+        monthString = "September"
+    } else if (monthNum == 10){
+        monthString = "October"
+    } else if (monthNum == 11){
+        monthString = "November"
+    } else if (monthNum == 12){
+        monthString = "December"
+    }
 
-  return monthString;
+    return monthString;
 }
 
 
 function phasesColorr() { //detemines phase blocks and colors
-//set cells to grab info from 
-var prepCell = "C6"
-var confirmationCell = "C7";
-var designCell = "C8";
-var buildCell = "C9";
-var deployCell = "C10";
-var hypercareCell = "C11";
-var sheetName = "Timeline";
+//set cells to grab info from
+    var sheetName = "Phase Maker"
 
 //takes weeks for each phase
-var sh2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName)
-var prep = sh2.getRange(prepCell).getValue();
-var confirmation = sh2.getRange(confirmationCell).getValue();
-var design = sh2.getRange(designCell).getValue();
-var build = sh2.getRange(buildCell).getValue();
-var deploy = sh2.getRange(deployCell).getValue();
-var hypercare = sh2.getRange(hypercareCell).getValue();
+    var sh2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName)
+    var prep = sh2.getRange(prepCell).getValue();
+    var confirmation = sh2.getRange(confirmationCell).getValue();
+    var design = sh2.getRange(designCell).getValue();
+    var build = sh2.getRange(buildCell).getValue();
+    var deploy = sh2.getRange(deployCell).getValue();
+    var hypercare = sh2.getRange(hypercareCell).getValue();
+
 
 //gets number of blocks to be colored in then adds to previous phase
-if (prep != 0){
-  sh2.getRange(6,6,1,prep).setBackground("#dedede");
-  sh2.setRowHeight(5,60);
-}
+    rowStart++;
+    if (prep != 0){
+        sh2.getRange(rowStart,colStart,1,prep).setBackground(phase1Color);
+    }
 
-var endCol = prep + 6;
-if (confirmation != 0) {
-  sh2.getRange(7,endCol,1,confirmation).setBackground("#d9d9d9");
-}
+    var endCol = prep + colStart;
+    colStart++;
+    rowStart++;
+    if (confirmation != 0) {
+        sh2.getRange(rowStart,endCol,1,confirmation).setBackground(phase2Color);
+    }
 
-endCol += confirmation;
-if (design != 0) {
-  sh2.getRange(8,endCol,1,design).setBackground("#b7b7b7");
-}
+    endCol += confirmation;
+    colStart++;
+    rowStart++;
+    if (design != 0) {
+        sh2.getRange(rowStart,endCol,1,design).setBackground(phase3Color);
+    }
 
-endCol += design;
-if (build != 0){
-  sh2.getRange(9,endCol,1,build).setBackground("#666666");
-} 
+    endCol += design;
+    colStart++;
+    rowStart++;
+    if (build != 0){
+        sh2.getRange(rowStart,endCol,1,build).setBackground(phase4Color);
+    }
 
-endCol += build;
-if (deploy != 0) {
-  sh2.getRange(10,endCol,1,deploy).setBackground("#434343");
-} 
+    endCol += build;
+    colStart++;
+    rowStart++;
+    if (deploy != 0) {
+        sh2.getRange(rowStart,endCol,1,deploy).setBackground(phase5Color);
+    }
 
-endCol += deploy;
-if (hypercare != 0) {
-  sh2.getRange(11,endCol,1,hypercare+1).setBackground("#000000");
-}
+    endCol += deploy;
+    colStart++;
+    rowStart++;
+    if (hypercare != 0) {
+        sh2.getRange(rowStart,endCol,1,hypercare+1).setBackground(phase6Color);
+    }
 
 }
 
 
 //colors in phases by month
 function colorByMmonth(){
-  colorSet("D6","E6",6,"#dedede");
-  colorSet("D7","E7",7,"#d9d9d9");
-  colorSet("D8","E8",8,"#b7b7b7");
-  colorSet("D9","E9",9,"#666666");
-  colorSet("D10","E10",10,"#434343");
-  colorSet("D11","E11",11,"#000000");
+  var start = colStart - 3;
+  var cell1,cell2;
+  //console.log(cell);
+
+  for (i = 0; i < 6; i++){
+    var phase = "phase" + (i+1) + "Color";
+    var h = phase;
+    console.log(phase);
+    cell1 = getColumnLetters(start) + ((rowStart + 1)+ i)
+    cell2 = getColumnLetters(start + 1) + ((rowStart + 1)+i)
+    console.log(cell1 + " " + cell2);
+    colorSet(cell1,cell2,i+5,h);
+  }
+    // colorSet("C5","D5",5,phase1Color);
+    // colorSet("C6","D6",6,phase2Color);
+    // colorSet("C7","D7",7,phase3Color);
+    // colorSet("C8","D8",8,phase4Color);
+    // colorSet("C9","D9",9,phase5Color);
+    // colorSet("C10","D10",10,phase6Color);
 
 }
 
 
 function colorSet(ssCell,eeCell,row, color) {
-  //find number of blocks to be colored for each phase
-  var sheetName = "Timeline";
-  var sh2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName)
- 
-  //month tracker
-  var checkCellCol = 6;
-  var checkMonth = sh2.getRange(5, checkCellCol).getValue().getMonth() + 1;
-  var checkYear = sh2.getRange(5, checkCellCol).getValue().getFullYear();
-  var checking = numberToMonth(checkMonth) + " " + checkYear;
+    //find number of blocks to be colored for each phase
+    var sh2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName)
 
-  //find start date 
-  var start = sh2.getRange(ssCell).getValue().getMonth() + 1;
-  var startString = numberToMonth (start);
-  var startYear = sh2.getRange(ssCell).getValue().getFullYear();
-  var startDate = startString + " " + startYear;
+    //month tracker
+    var checkCellCol = 6;
+    var checkMonth = sh2.getRange(4, checkCellCol).getValue().getMonth() + 1;
+    var checkYear = sh2.getRange(4, checkCellCol).getValue().getFullYear();
+    var checking = numberToMonth(checkMonth) + " " + checkYear;
 
-  //find end date
-  var end = sh2.getRange(eeCell).getValue().getMonth() + 1;
-  var endString = numberToMonth (end);
-  var endYear = sh2.getRange(eeCell).getValue().getFullYear();
-  var endDate = endString + " " + endYear;
+    //find start date
+    var start = sh2.getRange(ssCell).getValue().getMonth() + 1;
+    var startString = numberToMonth (start);
+    var startYear = sh2.getRange(ssCell).getValue().getFullYear();
+    var startDate = startString + " " + startYear;
 
-  var numCol = 1; 
+    //find end date
+    var end = sh2.getRange(eeCell).getValue().getMonth() + 1;
+    var endString = numberToMonth (end);
+    var endYear = sh2.getRange(eeCell).getValue().getFullYear();
+    var endDate = endString + " " + endYear;
 
-  //finds where to start coloring blocks
-  while(startDate != checking){
-    checkCellCol ++;
+    var numCol = 1;
 
-    checkMonth = sh2.getRange(5, checkCellCol).getValue();
-    checkMonth = checkMonth.getMonth() + 1;
-    checkYear = sh2.getRange(5, checkCellCol).getValue().getFullYear();
-    checking = numberToMonth(checkMonth) + " " + checkYear;
+    //finds where to start coloring blocks
+    while(startDate != checking){
+        checkCellCol ++;
 
-  }
+        checkMonth = sh2.getRange(rowStart, checkCellCol).getValue();
+        checkMonth = checkMonth.getMonth() + 1;
+        checkYear = sh2.getRange(rowStart, checkCellCol).getValue().getFullYear();
+        checking = numberToMonth(checkMonth) + " " + checkYear;
 
-  var col = checkCellCol;
+    }
 
-  //finds how many blocks to color
-  while(checking != endDate){
-    checkCellCol ++;
-    checkMonth = sh2.getRange(5, checkCellCol).getValue();
-    checkMonth = checkMonth.getMonth() + 1;
-    checkYear = sh2.getRange(5, checkCellCol).getValue().getFullYear();
-    checking = numberToMonth(checkMonth) + " " + checkYear;
-    numCol++;
-  }
+    var col = checkCellCol;
 
-  sh2.getRange(row, col,1,numCol).setBackground(color);
+    //finds how many blocks to color
+    while(checking != endDate){
+        checkCellCol ++;
+        checkMonth = sh2.getRange(rowStart, checkCellCol).getValue();
+        checkMonth = checkMonth.getMonth() + 1;
+        checkYear = sh2.getRange(rowStart, checkCellCol).getValue().getFullYear();
+        checking = numberToMonth(checkMonth) + " " + checkYear;
+        numCol++;
+    }
+
+    sh2.getRange(row, col,1,numCol).setBackground(color);
 
 }
-
-
