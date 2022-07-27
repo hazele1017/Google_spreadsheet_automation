@@ -231,7 +231,7 @@ function colorByMmonth(){
     cell1 = getColumnLetters(start) + ((rowStart + 1)+ i)
     cell2 = getColumnLetters(start + 1) + ((rowStart + 1)+i)
     console.log(cell1 + " " + cell2);
-    colorSet(cell1,cell2,i+5,h);
+    colorSet(cell1,cell2,i+5,phase1Color);
   }
     // colorSet("C5","D5",5,phase1Color);
     // colorSet("C6","D6",6,phase2Color);
